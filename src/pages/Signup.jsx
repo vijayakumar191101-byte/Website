@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
+import { signupUser } from "../api/authService";
 import bgVideo from "../assets/bg_video.mp4";
 
 const countries = [
@@ -23,11 +24,7 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem("loggedInUser");
-    if (loggedInUser) navigate("/home");
-  }, [navigate]);
+  const [loading, setLoading] = useState(false);
 
   // Phone validation
   const rawPhone = phone.replace(/\D/g, "");
@@ -60,22 +57,37 @@ function Signup() {
 
   const isMatch = password === confirmPassword && confirmPassword !== "";
 
-  const handleSignup = (e) => {
+  // Signup Handler
+  const handleSignup = async (e) => {
     e.preventDefault();
+
     if (!isPasswordValid || !isMatch || !isPhoneValid) return;
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    if (users.find((u) => u.email === email)) {
-      alert("Account already exists!");
-      navigate("/login");
-      return;
+    setLoading(true);
+
+    try {
+      await signupUser({
+        email,
+        password,
+        phone: rawPhone,
+        countryCode,
+      });
+
+      setSuccess(true);
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data);
+      } else {
+        alert("Server not reachable ❌");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    users.push({ email, countryCode, phone: rawPhone, password });
-    localStorage.setItem("users", JSON.stringify(users));
-
-    setSuccess(true);
-    setTimeout(() => navigate("/login"), 2000);
   };
 
   return (
@@ -96,36 +108,18 @@ function Signup() {
 
       <form
         onSubmit={handleSignup}
-        className="
-        relative z-10 
-        w-full 
-        max-w-md 
-        sm:max-w-lg 
-        p-6 
-        sm:p-8 
-        md:p-10 
-        rounded-2xl
-        bg-white/10 
-        backdrop-blur-xl 
-        border border-white/20
-        shadow-2xl 
-        text-white 
-        animate-fadeSlide
-        "
+        className="relative z-10 w-full max-w-md sm:max-w-lg p-6 sm:p-8 md:p-10 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white"
       >
         {success ? (
           <div className="flex flex-col items-center text-center py-10">
-            <CheckCircle
-              size={80}
-              className="text-green-400 animate-bounce"
-            />
+            <CheckCircle size={80} className="text-green-400 animate-bounce" />
             <h2 className="mt-6 text-xl sm:text-2xl font-semibold">
               Account Created Successfully!
             </h2>
           </div>
         ) : (
           <>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6">
               Create Account
             </h2>
 
@@ -134,20 +128,17 @@ function Signup() {
               type="email"
               placeholder="Email"
               required
-              className="w-full p-3 mb-4 rounded-xl bg-white/20
-              placeholder-gray-300 focus:outline-none focus:ring-2
-              focus:ring-indigo-400 transition text-sm sm:text-base"
+              className="w-full p-3 mb-4 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            {/* Phone Section */}
+            {/* Phone */}
             <div className="flex flex-col sm:flex-row gap-3 mb-2">
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="p-3 rounded-xl bg-white/20 sm:w-32
-                focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm sm:text-base"
+                className="p-3 rounded-xl bg-white/20 sm:w-32 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 {countries.map((c, idx) => (
                   <option key={idx} value={c.code}>
@@ -161,20 +152,14 @@ function Signup() {
                 placeholder="Phone Number"
                 maxLength={12}
                 required
-                className="flex-1 p-3 rounded-xl bg-white/20
-                placeholder-gray-300 focus:outline-none focus:ring-2
-                focus:ring-indigo-400 transition text-sm sm:text-base"
+                className="flex-1 p-3 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={phone}
                 onChange={handlePhoneChange}
               />
             </div>
 
-            <div className={`text-xs sm:text-sm mb-4 font-medium ${
-              isPhoneValid ? "text-green-400" : "text-red-400"
-            }`}>
-              {isPhoneValid
-                ? "✅ Valid phone number"
-                : "❌ Enter valid 10-digit number"}
+            <div className={`text-sm mb-4 ${isPhoneValid ? "text-green-400" : "text-red-400"}`}>
+              {isPhoneValid ? "✅ Valid phone number" : "❌ Enter valid 10-digit number"}
             </div>
 
             {/* Password */}
@@ -183,9 +168,7 @@ function Signup() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 required
-                className="w-full p-3 rounded-xl bg-white/20
-                placeholder-gray-300 focus:outline-none focus:ring-2
-                focus:ring-indigo-400 transition text-sm sm:text-base"
+                className="w-full p-3 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -203,9 +186,7 @@ function Signup() {
                 type={showConfirm ? "text" : "password"}
                 placeholder="Confirm Password"
                 required
-                className="w-full p-3 rounded-xl bg-white/20
-                placeholder-gray-300 focus:outline-none focus:ring-2
-                focus:ring-indigo-400 transition text-sm sm:text-base"
+                className="w-full p-3 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -218,7 +199,7 @@ function Signup() {
             </div>
 
             {/* Password Rules */}
-            <div className="space-y-1 sm:space-y-2 mb-6 text-xs sm:text-sm">
+            <div className="space-y-1 mb-6 text-sm">
               <div className={passwordRules.length ? "text-green-400" : "text-red-400"}>
                 {passwordRules.length ? "✅" : "❌"} Minimum 8 characters
               </div>
@@ -238,17 +219,17 @@ function Signup() {
 
             {/* Button */}
             <button
-              disabled={!isPasswordValid || !isMatch || !isPhoneValid}
-              className={`w-full p-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+              disabled={!isPasswordValid || !isMatch || !isPhoneValid || loading}
+              className={`w-full p-3 rounded-xl font-semibold transition-all duration-300 ${
                 isPasswordValid && isMatch && isPhoneValid
                   ? "bg-indigo-600 hover:bg-indigo-700"
                   : "bg-gray-500 cursor-not-allowed"
               }`}
             >
-              Sign Up
+              {loading ? "Creating..." : "Sign Up"}
             </button>
 
-            <p className="text-center mt-6 text-xs sm:text-sm">
+            <p className="text-center mt-6 text-sm">
               Already have an account?{" "}
               <Link to="/login" className="text-indigo-400 hover:underline">
                 Login
