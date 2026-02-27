@@ -1,9 +1,8 @@
-import axios from "axios";
+import api from "./axiosConfig";
 
-const API = axios.create({
-  baseURL: "http://localhost:8080/api/auth",
-});
+// Auth endpoints
+export const signupUser = (data) =>
+  api.post("/api/auth/signup", data);
 
-export const signupUser = (data) => API.post("/signup", data);
-
-export const loginUser = (data) => API.post("/login", data);
+export const loginUser = (data) =>
+  api.post("/api/auth/login", data);

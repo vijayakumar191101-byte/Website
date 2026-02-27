@@ -1,13 +1,35 @@
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "../api/axiosConfig"; // ✅ use global axios instance
 import bgVideo from "../assets/bg_video.mp4";
 
 function Home() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("loggedInUser"));
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSecureData = async () => {
+      try {
+        const response = await api.get("/api/test/secure");
+
+        console.log("Secure response:", response.data);
+        setMessage(response.data);
+      } catch (error) {
+        console.error("Unauthorized ❌", error);
+        localStorage.removeItem("token");
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSecureData();
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
@@ -29,7 +51,8 @@ function Home() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
       {/* Content Card */}
-      <div className="
+      <div
+        className="
         relative z-10 
         w-full 
         max-w-md 
@@ -44,9 +67,9 @@ function Home() {
         border border-white/20
         shadow-2xl 
         text-white 
-        text-center 
-        animate-fadeSlide
-      ">
+        text-center
+      "
+      >
         <div className="flex justify-center mb-6">
           <div className="p-4 rounded-full bg-indigo-600/30 backdrop-blur-lg">
             <User size={40} className="text-indigo-400" />
@@ -58,7 +81,7 @@ function Home() {
         </h1>
 
         <p className="text-sm sm:text-base md:text-lg opacity-90 mb-8 break-words">
-          {user?.email}
+          {loading ? "Loading..." : message}
         </p>
 
         <button
