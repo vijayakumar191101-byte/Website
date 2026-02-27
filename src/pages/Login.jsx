@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { loginUser } from "../api/authService";
 import bgVideo from "../assets/bg_video.mp4";
 
-function Login() {
+function Login({ setIsLoggedIn }) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -27,9 +27,24 @@ function Login() {
 
       console.log("Login response:", response.data);
 
+      // 🔥 Get token from backend
+      const token = response.data.token;
+
+      if (!token) {
+        alert("Token not received from server ❌");
+        return;
+      }
+
+      // 🔥 Store token in localStorage
+      localStorage.setItem("token", token);
+
+      // 🔥 Update login state
+      if (setIsLoggedIn) {
+        setIsLoggedIn(true);
+      }
+
       alert("Login successful 🔥");
 
-      // Navigate after successful login
       navigate("/home");
 
     } catch (error) {
