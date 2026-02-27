@@ -7,12 +7,12 @@ function Signup() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
   const [success, setSuccess] = useState(false);
 
   // 🔄 Redirect if already logged in
@@ -20,6 +20,9 @@ function Signup() {
     const loggedInUser = localStorage.getItem("loggedInUser");
     if (loggedInUser) navigate("/home");
   }, [navigate]);
+
+  // 📱 Phone Validation (10 digits only)
+  const isPhoneValid = /^[0-9]{10}$/.test(phone);
 
   // 🔐 Password Rules
   const passwordRules = {
@@ -40,7 +43,7 @@ function Signup() {
   const handleSignup = (e) => {
     e.preventDefault();
 
-    if (!isPasswordValid || !isMatch) return;
+    if (!isPasswordValid || !isMatch || !isPhoneValid) return;
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
 
@@ -50,18 +53,17 @@ function Signup() {
       return;
     }
 
-    users.push({ email, password });
+    users.push({ email, phone, password });
     localStorage.setItem("users", JSON.stringify(users));
 
     setSuccess(true);
-
     setTimeout(() => navigate("/login"), 2000);
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-
-      {/* 🎥 Background Video */}
+      
+      {/* 🎥 Background */}
       <video
         autoPlay
         loop
@@ -72,10 +74,8 @@ function Signup() {
         <source src={bgVideo} type="video/mp4" />
       </video>
 
-      {/* 🌑 Overlay */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-      {/* 🧊 Glass Form */}
       <form
         onSubmit={handleSignup}
         className="relative z-10 w-[90%] max-w-md p-10 rounded-2xl 
@@ -88,9 +88,6 @@ function Signup() {
             <h2 className="mt-6 text-2xl font-semibold">
               Account Created Successfully!
             </h2>
-            <p className="text-sm text-gray-300 mt-2">
-              Redirecting to login...
-            </p>
           </div>
         ) : (
           <>
@@ -103,15 +100,38 @@ function Signup() {
               type="email"
               placeholder="Email"
               required
-              className="w-full p-3 mb-5 rounded-xl bg-white/20 
+              className="w-full p-3 mb-4 rounded-xl bg-white/20 
               placeholder-gray-300 focus:outline-none focus:ring-2 
               focus:ring-indigo-400 transition"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
 
+            {/* Phone */}
+            <input
+              type="text"
+              placeholder="Phone Number"
+              maxLength={10}
+              required
+              className="w-full p-3 mb-2 rounded-xl bg-white/20 
+              placeholder-gray-300 focus:outline-none focus:ring-2 
+              focus:ring-indigo-400 transition"
+              value={phone}
+              onChange={(e) =>
+                setPhone(e.target.value.replace(/\D/g, ""))
+              }
+            />
+
+            <div className={`text-sm mb-4 font-medium ${
+              isPhoneValid ? "text-green-400" : "text-red-400"
+            }`}>
+              {isPhoneValid
+                ? "✅ Valid 10-digit phone number"
+                : "❌ Enter valid 10-digit phone number"}
+            </div>
+
             {/* Password */}
-            <div className="relative mb-5">
+            <div className="relative mb-4">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
@@ -150,61 +170,29 @@ function Signup() {
               </div>
             </div>
 
-            {/* 🔐 Password Conditions */}
-            <div className="space-y-3 mb-6 text-sm">
-
-              <div className={`flex gap-2 font-medium transition-all duration-300 ${
-                passwordRules.length ? "text-green-400" : "text-red-400"
-              }`}>
-                {passwordRules.length ? "✅" : "❌"}
-                {passwordRules.length
-                  ? "Minimum 8 characters completed"
-                  : "Minimum 8 characters required"}
+            {/* Password Conditions */}
+            <div className="space-y-2 mb-6 text-sm">
+              <div className={passwordRules.length ? "text-green-400" : "text-red-400"}>
+                {passwordRules.length ? "✅" : "❌"} Minimum 8 characters
               </div>
-
-              <div className={`flex gap-2 font-medium transition-all duration-300 ${
-                passwordRules.uppercase ? "text-green-400" : "text-red-400"
-              }`}>
-                {passwordRules.uppercase ? "✅" : "❌"}
-                {passwordRules.uppercase
-                  ? "Uppercase letter added"
-                  : "At least one uppercase letter required"}
+              <div className={passwordRules.uppercase ? "text-green-400" : "text-red-400"}>
+                {passwordRules.uppercase ? "✅" : "❌"} One uppercase letter
               </div>
-
-              <div className={`flex gap-2 font-medium transition-all duration-300 ${
-                passwordRules.number ? "text-green-400" : "text-red-400"
-              }`}>
-                {passwordRules.number ? "✅" : "❌"}
-                {passwordRules.number
-                  ? "Number added"
-                  : "At least one number required"}
+              <div className={passwordRules.number ? "text-green-400" : "text-red-400"}>
+                {passwordRules.number ? "✅" : "❌"} One number
               </div>
-
-              <div className={`flex gap-2 font-medium transition-all duration-300 ${
-                passwordRules.symbol ? "text-green-400" : "text-red-400"
-              }`}>
-                {passwordRules.symbol ? "✅" : "❌"}
-                {passwordRules.symbol
-                  ? "Special symbol added"
-                  : "At least one special symbol required"}
+              <div className={passwordRules.symbol ? "text-green-400" : "text-red-400"}>
+                {passwordRules.symbol ? "✅" : "❌"} One special symbol
               </div>
-
-              <div className={`flex gap-2 font-medium transition-all duration-300 ${
-                isMatch ? "text-green-400" : "text-red-400"
-              }`}>
-                {isMatch ? "✅" : "❌"}
-                {isMatch
-                  ? "Passwords match"
-                  : "Passwords do not match"}
+              <div className={isMatch ? "text-green-400" : "text-red-400"}>
+                {isMatch ? "✅" : "❌"} Passwords match
               </div>
-
             </div>
 
-            {/* Submit Button */}
             <button
-              disabled={!isPasswordValid || !isMatch}
+              disabled={!isPasswordValid || !isMatch || !isPhoneValid}
               className={`w-full p-3 rounded-xl font-semibold transition-all duration-300 ${
-                isPasswordValid && isMatch
+                isPasswordValid && isMatch && isPhoneValid
                   ? "btn-premium"
                   : "bg-gray-500 cursor-not-allowed"
               }`}
