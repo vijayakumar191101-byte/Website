@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import api from "../api/axiosConfig";
 import { useCart } from "../context/CartContext";
 
-// Temporary product data (later connect backend)
 const products = [
   { id: 1, name: "Tomato", category: "vegetables", price: 2 },
   { id: 2, name: "Potato", category: "vegetables", price: 1.5 },
@@ -34,45 +34,93 @@ function Home() {
   }, [navigate]);
 
   if (loading) {
-    return <div className="p-10 text-center text-lg">Loading...</div>;
+    return (
+      <div className="p-20 text-center text-lg text-slate-700 dark:text-slate-200">
+        Loading...
+      </div>
+    );
   }
 
   const categories = ["vegetables", "fruits", "chips", "beverages"];
 
   return (
-    <div className="p-6 space-y-14">
+    <div className="px-6 md:px-14 py-10 space-y-20">
       {categories.map((cat) => (
-        <div key={cat}>
-          <h2 className="text-3xl font-bold capitalize mb-6 text-green-700">
-            {cat}
-          </h2>
+        <section key={cat} className="space-y-8">
+          
+          {/* CATEGORY TITLE */}
+          <div className="flex items-center justify-between">
+            <h2 className="
+              text-3xl md:text-4xl font-bold capitalize
+              bg-gradient-to-r from-orange-500 to-amber-500
+              bg-clip-text text-transparent
+            ">
+              {cat}
+            </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <button
+              onClick={() => navigate(`/category/${cat}`)}
+              className="text-sm font-medium text-orange-500 hover:underline"
+            >
+              View All →
+            </button>
+          </div>
+
+          {/* PRODUCTS GRID */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {products
               .filter((p) => p.category === cat)
               .map((product) => (
-                <div
+                <motion.div
                   key={product.id}
-                  className="border p-5 rounded-xl shadow hover:shadow-xl transition duration-300 bg-white"
+                  whileHover={{ y: -6 }}
+                  className="
+                    group
+                    rounded-2xl
+                    p-6
+                    shadow-md hover:shadow-2xl
+                    transition-all duration-300
+                    bg-white dark:bg-slate-800
+                    border border-slate-200 dark:border-slate-700
+                  "
                 >
-                  <h3 className="font-semibold text-lg mb-2">
+                  {/* PRODUCT NAME */}
+                  <h3 className="
+                    font-semibold text-lg mb-2
+                    text-slate-800 dark:text-slate-100
+                  ">
                     {product.name}
                   </h3>
 
-                  <p className="text-gray-600 mb-3">
+                  {/* PRICE */}
+                  <p className="
+                    text-slate-500 dark:text-slate-400 mb-5
+                  ">
                     ${product.price}
                   </p>
 
-                  <button
+                  {/* BUTTON */}
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => addToCart(product)}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition"
+                    className="
+                      w-full
+                      bg-gradient-to-r from-orange-500 to-amber-500
+                      hover:from-orange-600 hover:to-amber-600
+                      text-white
+                      py-2.5
+                      rounded-xl
+                      font-medium
+                      shadow-md
+                      transition-all
+                    "
                   >
                     Add to Cart
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               ))}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );
