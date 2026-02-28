@@ -7,18 +7,21 @@ import slide3 from "../assets/slide3.jpg";
 
 const slides = [
   {
-    title: "Welcome to VK App",
-    description: "Your journey begins here.",
+    title: "Easy Shopping",
+    description:
+      "Browse thousands of products in organized categories and find everything you need quickly without wasting time searching different stores.",
     image: slide1,
   },
   {
-    title: "Fast & Modern UI",
-    description: "Built with React & Tailwind CSS.",
+    title: "Fresh Products",
+    description:
+      "Get fresh vegetables and fruits delivered daily from trusted local sellers to your doorstep with quality checks and affordable prices.",
     image: slide2,
   },
   {
-    title: "Secure Backend",
-    description: "Powered by Spring Boot.",
+    title: "Simple Checkout",
+    description:
+      "Add items to your cart, review your order, and complete secure checkout in just a few simple steps without any confusion.",
     image: slide3,
   },
 ];
@@ -65,10 +68,7 @@ function Onboarding() {
       const now = new Date().getTime();
       const expiry = now + 24 * 60 * 60 * 1000;
 
-      localStorage.setItem(
-        "onboardingData",
-        JSON.stringify({ expiry })
-      );
+      localStorage.setItem("onboardingData", JSON.stringify({ expiry }));
 
       navigate("/login");
     }, 700);
@@ -106,7 +106,8 @@ function Onboarding() {
 
             {/* Content */}
             <div className="relative text-center text-white max-w-3xl animate-fadeIn">
-              <h1 className="
+              <h1
+                className="
                 text-2xl 
                 sm:text-3xl 
                 md:text-4xl 
@@ -115,17 +116,20 @@ function Onboarding() {
                 font-bold 
                 mb-4 
                 leading-tight
-              ">
+              "
+              >
                 {slide.title}
               </h1>
 
-              <p className="
+              <p
+                className="
                 text-sm 
                 sm:text-base 
                 md:text-lg 
                 lg:text-xl 
                 opacity-90
-              ">
+              "
+              >
                 {slide.description}
               </p>
             </div>
@@ -166,9 +170,7 @@ function Onboarding() {
           <div
             key={index}
             className={`h-2 w-2 sm:h-3 sm:w-3 rounded-full transition-all duration-300 ${
-              current === index
-                ? "bg-white scale-125"
-                : "bg-white/40"
+              current === index ? "bg-white scale-125" : "bg-white/40"
             }`}
           />
         ))}
