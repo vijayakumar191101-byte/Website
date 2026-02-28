@@ -9,100 +9,92 @@ import CategoryPage from "./pages/CategoryPage";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
-import OrderSuccess from "./pages/OrderSuccess"; // ✅ NEW
+import OrderSuccess from "./pages/OrderSuccess";
 
 import Navbar from "./components/Navbar";
-import MobileNav from "./components/MobileNav"; // ✅ NEW
+import MobileNav from "./components/MobileNav";
+
+import { ThemeProvider } from "./context/ThemeContext";
 
 import { CartProvider } from "./context/CartContext";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // 🔐 Check token on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      setIsLoggedIn(true);
-    }
+    if (token) setIsLoggedIn(true);
   }, []);
 
   return (
+    <ThemeProvider>
     <CartProvider>
       <BrowserRouter>
 
-        {/* Layout Wrapper */}
         {isLoggedIn && <Navbar />}
 
-        <Routes>
+        {/* IMPORTANT: Add top padding because navbar is fixed */}
+        <div className="pt-28">
+          <Routes>
 
-          {/* Onboarding */}
-          <Route path="/" element={<Onboarding />} />
+            <Route path="/" element={<Onboarding />} />
 
-          {/* Signup */}
-          <Route
-            path="/signup"
-            element={!isLoggedIn ? <Signup /> : <Navigate to="/home" />}
-          />
+            <Route
+              path="/signup"
+              element={!isLoggedIn ? <Signup /> : <Navigate to="/home" />}
+            />
 
-          {/* Login */}
-          <Route
-            path="/login"
-            element={
-              !isLoggedIn ? (
-                <Login setIsLoggedIn={setIsLoggedIn} />
-              ) : (
-                <Navigate to="/home" />
-              )
-            }
-          />
+            <Route
+              path="/login"
+              element={
+                !isLoggedIn ? (
+                  <Login setIsLoggedIn={setIsLoggedIn} />
+                ) : (
+                  <Navigate to="/home" />
+                )
+              }
+            />
 
-          {/* Protected Home */}
-          <Route
-            path="/home"
-            element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/home"
+              element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
+            />
 
-          {/* Protected Category */}
-          <Route
-            path="/category/:name"
-            element={isLoggedIn ? <CategoryPage /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/category/:name"
+              element={isLoggedIn ? <CategoryPage /> : <Navigate to="/login" />}
+            />
 
-          {/* Protected Cart */}
-          <Route
-            path="/cart"
-            element={isLoggedIn ? <Cart /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/cart"
+              element={isLoggedIn ? <Cart /> : <Navigate to="/login" />}
+            />
 
-          {/* Protected Checkout */}
-          <Route
-            path="/checkout"
-            element={isLoggedIn ? <Checkout /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/checkout"
+              element={isLoggedIn ? <Checkout /> : <Navigate to="/login" />}
+            />
 
-          {/* ✅ Order Success Page */}
-          <Route
-            path="/success"
-            element={isLoggedIn ? <OrderSuccess /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/success"
+              element={isLoggedIn ? <OrderSuccess /> : <Navigate to="/login" />}
+            />
 
-          {/* Protected Profile */}
-          <Route
-            path="/profile"
-            element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/profile"
+              element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
+            />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/" />} />
 
-        </Routes>
+          </Routes>
+        </div>
 
-        {/* ✅ Mobile Bottom Navigation (only logged in) */}
         {isLoggedIn && <MobileNav />}
 
       </BrowserRouter>
     </CartProvider>
+    </ThemeProvider>
   );
 }
 
