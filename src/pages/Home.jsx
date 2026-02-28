@@ -1,23 +1,28 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import api from "../api/axiosConfig"; // ✅ use global axios instance
-import bgVideo from "../assets/bg_video.mp4";
+import api from "../api/axiosConfig";
+import { useCart } from "../context/CartContext";
+
+// Temporary product data (later connect backend)
+const products = [
+  { id: 1, name: "Tomato", category: "vegetables", price: 2 },
+  { id: 2, name: "Potato", category: "vegetables", price: 1.5 },
+  { id: 3, name: "Apple", category: "fruits", price: 3 },
+  { id: 4, name: "Banana", category: "fruits", price: 2 },
+  { id: 5, name: "Lays Chips", category: "chips", price: 4 },
+  { id: 6, name: "Orange Juice", category: "beverages", price: 5 },
+];
 
 function Home() {
   const navigate = useNavigate();
-  const [message, setMessage] = useState("");
+  const { addToCart } = useCart();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSecureData = async () => {
+    const checkAuth = async () => {
       try {
-        const response = await api.get("/api/test/secure");
-
-        console.log("Secure response:", response.data);
-        setMessage(response.data);
+        await api.get("/api/test/secure");
       } catch (error) {
-        console.error("Unauthorized ❌", error);
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
@@ -25,89 +30,50 @@ function Home() {
       }
     };
 
-    fetchSecureData();
+    checkAuth();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  if (loading) {
+    return <div className="p-10 text-center text-lg">Loading...</div>;
+  }
+
+  const categories = ["vegetables", "fruits", "chips", "beverages"];
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
+    <div className="p-6 space-y-14">
+      {categories.map((cat) => (
+        <div key={cat}>
+          <h2 className="text-3xl font-bold capitalize mb-6 text-green-700">
+            {cat}
+          </h2>
 
-      {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute w-full h-full object-cover"
-      >
-        <source src={bgVideo} type="video/mp4" />
-      </video>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {products
+              .filter((p) => p.category === cat)
+              .map((product) => (
+                <div
+                  key={product.id}
+                  className="border p-5 rounded-xl shadow hover:shadow-xl transition duration-300 bg-white"
+                >
+                  <h3 className="font-semibold text-lg mb-2">
+                    {product.name}
+                  </h3>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-none"></div>
+                  <p className="text-gray-600 mb-3">
+                    ${product.price}
+                  </p>
 
-      {/* Content Card */}
-      <div
-        className="
-        relative z-10 
-        w-full 
-        max-w-md 
-        sm:max-w-lg 
-        md:max-w-xl 
-        p-6 
-        sm:p-8 
-        md:p-10 
-        rounded-2xl
-        bg-white/10 
-        backdrop-blur-xl 
-        border border-white/20
-        shadow-2xl 
-        text-white 
-        text-center
-      "
-      >
-        <div className="flex justify-center mb-6">
-          <div className="p-4 rounded-full bg-indigo-600/30 backdrop-blur-lg">
-            <User size={40} className="text-indigo-400" />
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              ))}
           </div>
         </div>
-
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-          Welcome Back 👋
-        </h1>
-
-        <p className="text-sm sm:text-base md:text-lg opacity-90 mb-8 break-words">
-          {loading ? "Loading..." : message}
-        </p>
-
-        <button
-          onClick={handleLogout}
-          className="
-          w-full 
-          flex 
-          items-center 
-          justify-center 
-          gap-2 
-          px-6 
-          py-3 
-          rounded-xl 
-          font-semibold 
-          text-sm 
-          sm:text-base
-          bg-red-600 
-          hover:bg-red-700 
-          transition-all 
-          duration-300
-          "
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
-      </div>
+      ))}
     </div>
   );
 }
