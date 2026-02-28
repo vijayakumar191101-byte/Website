@@ -72,7 +72,7 @@ function Login({ setIsLoggedIn }) {
         <source src={bgVideo} type="video/mp4" />
       </video>
 
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-none"></div>
 
       <form
         onSubmit={handleLogin}
