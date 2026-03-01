@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import slide1 from "../assets/slide1.jpg";
@@ -9,34 +9,36 @@ const slides = [
   {
     title: "Easy Shopping",
     description:
-      "Browse thousands of products in organized categories and find everything you need quickly without wasting time searching different stores.",
+      "Browse thousands of products in organized categories and find everything you need quickly.",
     image: slide1,
   },
   {
     title: "Fresh Products",
     description:
-      "Get fresh vegetables and fruits delivered daily from trusted local sellers to your doorstep with quality checks and affordable prices.",
+      "Daily fresh vegetables & fruits from trusted sellers with quality checks at the best price.",
     image: slide2,
   },
   {
     title: "Simple Checkout",
     description:
-      "Add items to your cart, review your order, and complete secure checkout in just a few simple steps without any confusion.",
+      "Add items to cart, review your order, and complete secure checkout in seconds.",
     image: slide3,
   },
 ];
 
 function Onboarding() {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
-  const navigate = useNavigate();
 
-  // 24-hour expiry check
+  const total = slides.length;
+  const isLast = current === total - 1;
+
+  // ✅ 24-hour expiry check
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("onboardingData"));
-
     if (data) {
-      const now = new Date().getTime();
+      const now = Date.now();
       if (now < data.expiry) {
         navigate("/login");
       } else {
@@ -45,135 +47,144 @@ function Onboarding() {
     }
   }, [navigate]);
 
-  // Auto slide logic
+  // ✅ Auto slide (stops at last)
   useEffect(() => {
-    if (current === slides.length - 1) {
-      const timeout = setTimeout(() => {
-        handleFinish();
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
+    if (isLast) return;
 
-    const interval = setInterval(() => {
-      setCurrent((prev) => prev + 1);
-    }, 3000);
+    const id = setTimeout(() => setCurrent((c) => c + 1), 4500);
+    return () => clearTimeout(id);
+  }, [current, isLast]);
 
-    return () => clearInterval(interval);
-  }, [current]);
+  const progress = useMemo(() => ((current + 1) / total) * 100, [current, total]);
 
-  const handleFinish = () => {
+  const finish = () => {
     setFadeOut(true);
-
     setTimeout(() => {
-      const now = new Date().getTime();
+      const now = Date.now();
       const expiry = now + 24 * 60 * 60 * 1000;
-
       localStorage.setItem("onboardingData", JSON.stringify({ expiry }));
-
       navigate("/login");
-    }, 700);
+    }, 600);
+  };
+
+  const next = () => {
+    if (isLast) finish();
+    else setCurrent((c) => c + 1);
+  };
+
+  const prev = () => {
+    if (current > 0) setCurrent((c) => c - 1);
   };
 
   return (
     <div
-      className={`relative min-h-screen w-full overflow-hidden transition-opacity duration-700 ${
+      className={`relative min-h-screen w-full overflow-hidden transition-opacity duration-600 ${
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
     >
-      {/* Progress Bar */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-white/30 z-50">
-        <div
-          className="h-full bg-white transition-all duration-[3000ms] ease-linear"
-          style={{
-            width: `${((current + 1) / slides.length) * 100}%`,
-          }}
-        />
-      </div>
-
-      {/* Slides */}
+      {/* Background slides */}
       <div
-        className="flex min-h-screen transition-transform duration-700 ease-in-out"
+        className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {slides.map((slide, index) => (
+        {slides.map((slide, idx) => (
           <div
-            key={index}
-            className="relative min-h-screen w-full flex-shrink-0 bg-cover bg-center flex items-center justify-center px-4 sm:px-8"
+            key={idx}
+            className="min-w-full min-h-screen bg-cover bg-center"
             style={{ backgroundImage: `url(${slide.image})` }}
-          >
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-none"></div>
-
-            {/* Content */}
-            <div className="relative text-center text-white max-w-3xl animate-fadeIn">
-              <h1
-                className="
-                text-2xl 
-                sm:text-3xl 
-                md:text-4xl 
-                lg:text-5xl 
-                xl:text-6xl 
-                font-bold 
-                mb-4 
-                leading-tight
-              "
-              >
-                {slide.title}
-              </h1>
-
-              <p
-                className="
-                text-sm 
-                sm:text-base 
-                md:text-lg 
-                lg:text-xl 
-                opacity-90
-              "
-              >
-                {slide.description}
-              </p>
-            </div>
-          </div>
+          />
         ))}
       </div>
 
-      {/* Skip Button */}
+      {/* Dark overlay + soft gradient */}
+      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/40 to-black/70" />
+
+      {/* Top progress */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-white/20 z-50">
+        <div
+          className="h-full bg-gradient-to-r from-orange-400 to-yellow-300 transition-all duration-700"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      {/* Skip */}
       <button
-        onClick={handleFinish}
-        className="
-          absolute 
-          top-4 
-          right-4 
-          sm:top-6 
-          sm:right-6
-          bg-white/20 
-          backdrop-blur-lg 
-          text-white 
-          text-sm 
-          sm:text-base
-          px-3 
-          sm:px-5 
-          py-2 
-          rounded-lg 
-          border border-white/30
-          hover:bg-white/40 
-          transition-all 
-          duration-300
-        "
+        onClick={finish}
+        className="absolute top-6 right-6 z-50 px-4 py-2 rounded-xl
+        bg-white/10 border border-white/20 text-white text-sm
+        backdrop-blur-xl hover:bg-white/20 transition"
       >
         Skip
       </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-6 sm:bottom-10 w-full flex justify-center gap-2 sm:gap-3">
-        {slides.map((_, index) => (
-          <div
-            key={index}
-            className={`h-2 w-2 sm:h-3 sm:w-3 rounded-full transition-all duration-300 ${
-              current === index ? "bg-white scale-125" : "bg-white/40"
-            }`}
-          />
-        ))}
+      {/* Center glass card */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
+        <div
+          className="
+          w-full max-w-xl
+          rounded-3xl
+          bg-white/10 border border-white/15
+          backdrop-blur-2xl
+          shadow-2xl
+          p-7 sm:p-10
+          text-white
+          "
+        >
+          {/* Small label */}
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-xs tracking-widest uppercase text-white/70">
+              FreshMart • Onboarding
+            </span>
+            <span className="text-xs text-white/70">
+              {current + 1} / {total}
+            </span>
+          </div>
+
+          {/* Content */}
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-4 leading-tight">
+            <span className="bg-gradient-to-r from-orange-400 to-yellow-200 bg-clip-text text-transparent">
+              {slides[current].title}
+            </span>
+          </h1>
+
+          <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-8">
+            {slides[current].description}
+          </p>
+
+          {/* Dots */}
+          <div className="flex gap-2 mb-8">
+            {slides.map((_, i) => (
+              <div
+                key={i}
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  i === current ? "w-10 bg-orange-400" : "w-2.5 bg-white/30"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Buttons */}
+          <div className="flex items-center justify-between gap-4">
+            <button
+              onClick={prev}
+              disabled={current === 0}
+              className="px-5 py-3 rounded-2xl bg-white/10 border border-white/15
+              hover:bg-white/20 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Back
+            </button>
+
+            <button
+              onClick={next}
+              className="flex-1 px-6 py-3 rounded-2xl font-semibold
+              bg-gradient-to-r from-orange-500 to-yellow-400 text-black
+              hover:brightness-110 transition"
+            >
+              {isLast ? "Get Started" : "Next"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

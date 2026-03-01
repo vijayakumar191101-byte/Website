@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import api from "../api/axiosConfig";
 import { useCart } from "../context/CartContext";
+import { motion } from "framer-motion";
 
 const products = [
   { id: 1, name: "Tomato", category: "vegetables", price: 2 },
@@ -22,105 +22,57 @@ function Home() {
     const checkAuth = async () => {
       try {
         await api.get("/api/test/secure");
-      } catch (error) {
+      } catch {
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, [navigate]);
 
-  if (loading) {
-    return (
-      <div className="p-20 text-center text-lg text-slate-700 dark:text-slate-200">
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return null;
 
   const categories = ["vegetables", "fruits", "chips", "beverages"];
 
   return (
-    <div className="px-6 md:px-14 py-10 space-y-20">
+    <div className="min-h-screen px-6 md:px-12 pb-20 space-y-16">
       {categories.map((cat) => (
-        <section key={cat} className="space-y-8">
-          
-          {/* CATEGORY TITLE */}
-          <div className="flex items-center justify-between">
-            <h2 className="
-              text-3xl md:text-4xl font-bold capitalize
-              bg-gradient-to-r from-orange-500 to-amber-500
-              bg-clip-text text-transparent
-            ">
+        <div key={cat}>
+          <h2 className="text-3xl font-bold mb-8 capitalize">
+            <span className="bg-gradient-to-r from-orange-500 to-teal-400 bg-clip-text text-transparent">
               {cat}
-            </h2>
+            </span>
+          </h2>
 
-            <button
-              onClick={() => navigate(`/category/${cat}`)}
-              className="text-sm font-medium text-orange-500 hover:underline"
-            >
-              View All →
-            </button>
-          </div>
-
-          {/* PRODUCTS GRID */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {products
               .filter((p) => p.category === cat)
               .map((product) => (
                 <motion.div
-                  key={product.id}
                   whileHover={{ y: -6 }}
-                  className="
-                    group
-                    rounded-2xl
-                    p-6
-                    shadow-md hover:shadow-2xl
-                    transition-all duration-300
-                    bg-white dark:bg-slate-800
-                    border border-slate-200 dark:border-slate-700
-                  "
+                  key={product.id}
+                  className="glass rounded-2xl p-6 shadow-xl"
                 >
-                  {/* PRODUCT NAME */}
-                  <h3 className="
-                    font-semibold text-lg mb-2
-                    text-slate-800 dark:text-slate-100
-                  ">
+                  <h3 className="text-lg font-semibold mb-2">
                     {product.name}
                   </h3>
 
-                  {/* PRICE */}
-                  <p className="
-                    text-slate-500 dark:text-slate-400 mb-5
-                  ">
+                  <p className="mb-4 text-slate-500 dark:text-slate-300">
                     ${product.price}
                   </p>
 
-                  {/* BUTTON */}
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={() => addToCart(product)}
-                    className="
-                      w-full
-                      bg-gradient-to-r from-orange-500 to-amber-500
-                      hover:from-orange-600 hover:to-amber-600
-                      text-white
-                      py-2.5
-                      rounded-xl
-                      font-medium
-                      shadow-md
-                      transition-all
-                    "
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl"
                   >
                     Add to Cart
-                  </motion.button>
+                  </button>
                 </motion.div>
               ))}
           </div>
-        </section>
+        </div>
       ))}
     </div>
   );

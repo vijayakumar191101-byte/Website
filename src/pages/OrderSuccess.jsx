@@ -1,30 +1,49 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { CheckCircle } from "lucide-react";
 
 function OrderSuccess() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 150 }}
-        className="bg-green-500 text-white p-10 rounded-full text-4xl"
+        transition={{ type: "spring", stiffness: 120 }}
+        className="bg-orange-500 text-white p-8 rounded-full shadow-xl"
       >
-        ✓
+        <CheckCircle size={60} />
       </motion.div>
 
-      <h2 className="text-3xl font-bold mt-6">
+      <motion.h2
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="text-3xl font-bold mt-8"
+      >
         Order Placed Successfully!
-      </h2>
+      </motion.h2>
 
-      <button
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="text-slate-500 dark:text-slate-300 mt-4"
+      >
+        Thank you for shopping with FreshMart.
+      </motion.p>
+
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
         onClick={() => navigate("/home")}
-        className="mt-6 bg-green-600 text-white px-6 py-3 rounded-xl"
+        className="mt-8 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl"
       >
         Continue Shopping
-      </button>
+      </motion.button>
     </div>
   );
 }

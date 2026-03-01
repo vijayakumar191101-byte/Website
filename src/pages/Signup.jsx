@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react";
 import { signupUser } from "../api/authService";
 import bgVideo from "../assets/bg_video.mp4";
 
@@ -60,11 +60,9 @@ function Signup() {
   // Signup Handler
   const handleSignup = async (e) => {
     e.preventDefault();
-
     if (!isPasswordValid || !isMatch || !isPhoneValid) return;
 
     setLoading(true);
-
     try {
       await signupUser({
         email,
@@ -74,52 +72,65 @@ function Signup() {
       });
 
       setSuccess(true);
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-
+      setTimeout(() => navigate("/login"), 1600);
     } catch (error) {
-      if (error.response) {
-        alert(error.response.data);
-      } else {
-        alert("Server not reachable ❌");
-      }
+      if (error.response) alert(error.response.data);
+      else alert("Server not reachable ❌");
     } finally {
       setLoading(false);
     }
   };
 
+  const Rule = ({ ok, label }) => (
+    <div className="flex items-center gap-2 text-sm">
+      <span className={ok ? "text-emerald-400" : "text-rose-400"}>
+        {ok ? "✅" : "❌"}
+      </span>
+      <span className="text-white/80">{label}</span>
+    </div>
+  );
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
-
       {/* Background Video */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover"
       >
         <source src={bgVideo} type="video/mp4" />
       </video>
 
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       <form
         onSubmit={handleSignup}
-        className="relative z-10 w-full max-w-md sm:max-w-lg p-6 sm:p-8 md:p-10 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl text-white"
+        className="
+          relative z-10 w-full max-w-md
+          rounded-3xl border border-white/15
+          bg-white/10 backdrop-blur-2xl
+          shadow-[0_20px_60px_rgba(0,0,0,0.45)]
+          p-6 sm:p-8
+          text-white
+          animate-fadeSlide
+        "
       >
         {success ? (
           <div className="flex flex-col items-center text-center py-10">
-            <CheckCircle size={80} className="text-green-400 animate-bounce" />
+            <CheckCircle size={84} className="text-emerald-400 animate-bounce" />
             <h2 className="mt-6 text-xl sm:text-2xl font-semibold">
-              Account Created Successfully!
+              Account Created!
             </h2>
+            <p className="mt-2 text-white/70 text-sm">
+              Redirecting to login...
+            </p>
           </div>
         ) : (
           <>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6">
               Create Account
             </h2>
 
@@ -128,7 +139,15 @@ function Signup() {
               type="email"
               placeholder="Email"
               required
-              className="w-full p-3 mb-4 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+              className="
+                w-full rounded-xl bg-white/15
+                px-4 py-3 mb-4
+                placeholder:text-white/50
+                outline-none
+                ring-1 ring-white/10
+                focus:ring-2 focus:ring-orange-400/70
+                transition
+              "
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -138,10 +157,15 @@ function Signup() {
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="p-3 rounded-xl bg-white/20 sm:w-32 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="
+                  rounded-xl bg-white/15 px-4 py-3
+                  ring-1 ring-white/10 outline-none
+                  focus:ring-2 focus:ring-orange-400/70
+                  sm:w-36
+                "
               >
                 {countries.map((c, idx) => (
-                  <option key={idx} value={c.code}>
+                  <option key={idx} value={c.code} className="text-black">
                     {c.name} ({c.code})
                   </option>
                 ))}
@@ -152,14 +176,28 @@ function Signup() {
                 placeholder="Phone Number"
                 maxLength={12}
                 required
-                className="flex-1 p-3 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="
+                  flex-1 rounded-xl bg-white/15
+                  px-4 py-3
+                  placeholder:text-white/50
+                  outline-none
+                  ring-1 ring-white/10
+                  focus:ring-2 focus:ring-orange-400/70
+                  transition
+                "
                 value={phone}
                 onChange={handlePhoneChange}
               />
             </div>
 
-            <div className={`text-sm mb-4 ${isPhoneValid ? "text-green-400" : "text-red-400"}`}>
-              {isPhoneValid ? "✅ Valid phone number" : "❌ Enter valid 10-digit number"}
+            <div
+              className={`text-sm mb-4 ${
+                isPhoneValid ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {isPhoneValid
+                ? "✅ Valid phone number"
+                : "❌ Enter valid 10-digit number"}
             </div>
 
             {/* Password */}
@@ -168,70 +206,89 @@ function Signup() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 required
-                className="w-full p-3 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="
+                  w-full rounded-xl bg-white/15
+                  px-4 py-3 pr-12
+                  placeholder:text-white/50
+                  outline-none
+                  ring-1 ring-white/10
+                  focus:ring-2 focus:ring-orange-400/70
+                  transition
+                "
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div
-                className="absolute right-4 top-3 cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
               >
                 {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-              </div>
+              </button>
             </div>
 
             {/* Confirm Password */}
-            <div className="relative mb-6">
+            <div className="relative mb-5">
               <input
                 type={showConfirm ? "text" : "password"}
                 placeholder="Confirm Password"
                 required
-                className="w-full p-3 rounded-xl bg-white/20 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="
+                  w-full rounded-xl bg-white/15
+                  px-4 py-3 pr-12
+                  placeholder:text-white/50
+                  outline-none
+                  ring-1 ring-white/10
+                  focus:ring-2 focus:ring-orange-400/70
+                  transition
+                "
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
-              <div
-                className="absolute right-4 top-3 cursor-pointer"
-                onClick={() => setShowConfirm(!showConfirm)}
+              <button
+                type="button"
+                onClick={() => setShowConfirm((s) => !s)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
               >
                 {showConfirm ? <Eye size={20} /> : <EyeOff size={20} />}
-              </div>
+              </button>
             </div>
 
             {/* Password Rules */}
-            <div className="space-y-1 mb-6 text-sm">
-              <div className={passwordRules.length ? "text-green-400" : "text-red-400"}>
-                {passwordRules.length ? "✅" : "❌"} Minimum 8 characters
-              </div>
-              <div className={passwordRules.uppercase ? "text-green-400" : "text-red-400"}>
-                {passwordRules.uppercase ? "✅" : "❌"} One uppercase letter
-              </div>
-              <div className={passwordRules.number ? "text-green-400" : "text-red-400"}>
-                {passwordRules.number ? "✅" : "❌"} One number
-              </div>
-              <div className={passwordRules.symbol ? "text-green-400" : "text-red-400"}>
-                {passwordRules.symbol ? "✅" : "❌"} One special symbol
-              </div>
-              <div className={isMatch ? "text-green-400" : "text-red-400"}>
-                {isMatch ? "✅" : "❌"} Passwords match
-              </div>
+            <div className="rounded-2xl bg-black/20 border border-white/10 p-4 mb-6 space-y-2">
+              <Rule ok={passwordRules.length} label="Minimum 8 characters" />
+              <Rule ok={passwordRules.uppercase} label="One uppercase letter" />
+              <Rule ok={passwordRules.number} label="One number" />
+              <Rule ok={passwordRules.symbol} label="One special symbol" />
+              <Rule ok={isMatch} label="Passwords match" />
             </div>
 
             {/* Button */}
             <button
               disabled={!isPasswordValid || !isMatch || !isPhoneValid || loading}
-              className={`w-full p-3 rounded-xl font-semibold transition-all duration-300 ${
-                isPasswordValid && isMatch && isPhoneValid
-                  ? "bg-indigo-600 hover:bg-indigo-700"
-                  : "bg-gray-500 cursor-not-allowed"
-              }`}
+              className={`
+                w-full rounded-2xl py-3 font-semibold
+                transition-all duration-300
+                ${
+                  isPasswordValid && isMatch && isPhoneValid && !loading
+                    ? "bg-gradient-to-r from-orange-500 to-amber-400 hover:brightness-110 shadow-lg shadow-orange-500/20"
+                    : "bg-white/15 text-white/60 cursor-not-allowed"
+                }
+              `}
             >
-              {loading ? "Creating..." : "Sign Up"}
+              {loading ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Loader2 className="animate-spin" size={18} />
+                  Creating...
+                </span>
+              ) : (
+                "Sign Up"
+              )}
             </button>
 
-            <p className="text-center mt-6 text-sm">
+            <p className="text-center mt-6 text-sm text-white/80">
               Already have an account?{" "}
-              <Link to="/login" className="text-indigo-400 hover:underline">
+              <Link to="/login" className="text-orange-300 hover:underline">
                 Login
               </Link>
             </p>

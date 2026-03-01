@@ -1,47 +1,36 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
-const CartContext = createContext();
+const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
   const addToCart = (product) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
-
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.id === product.id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        );
-      } else {
-        return [...prevCart, { ...product, qty: 1 }];
+    setCart((prev) => {
+      const exist = prev.find((i) => i.id === product.id);
+      if (exist) {
+        return prev.map((i) => (i.id === product.id ? { ...i, qty: i.qty + 1 } : i));
       }
+      return [...prev, { ...product, qty: 1 }];
     });
   };
 
   const increaseQty = (id) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === id ? { ...item, qty: item.qty + 1 } : item
-      )
-    );
+    setCart((prev) => prev.map((i) => (i.id === id ? { ...i, qty: i.qty + 1 } : i)));
   };
 
   const decreaseQty = (id) => {
-    setCart((prevCart) =>
-      prevCart
-        .map((item) =>
-          item.id === id ? { ...item, qty: item.qty - 1 } : item
-        )
-        .filter((item) => item.qty > 0)
+    setCart((prev) =>
+      prev
+        .map((i) => (i.id === id ? { ...i, qty: i.qty - 1 } : i))
+        .filter((i) => i.qty > 0)
     );
   };
 
-  const getTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.qty, 0);
-  };
+  const getTotal = () => cart.reduce((t, i) => t + i.price * i.qty, 0);
+
+  // ✅ total quantity (professional)
+  const totalItems = useMemo(() => cart.reduce((sum, i) => sum + i.qty, 0), [cart]);
 
   return (
     <CartContext.Provider
@@ -51,6 +40,7 @@ export function CartProvider({ children }) {
         increaseQty,
         decreaseQty,
         getTotal,
+        totalItems, // ✅ NEW
       }}
     >
       {children}
@@ -59,5 +49,7 @@ export function CartProvider({ children }) {
 }
 
 export function useCart() {
-  return useContext(CartContext);
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used inside CartProvider");
+  return ctx;
 }

@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import api from "../api/axiosConfig";
+import { motion } from "framer-motion";
 
 function Profile() {
   const navigate = useNavigate();
@@ -12,104 +12,52 @@ function Profile() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.get("/api/test/secure");
-        setMessage(response.data);
-      } catch (error) {
+        const res = await api.get("/api/test/secure");
+        setMessage(res.data);
+      } catch {
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-    window.location.reload();
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-slate-700 dark:text-slate-200">
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return null;
 
   return (
-    <div className="
-      min-h-screen
-      flex justify-center items-center
-      px-6
-      bg-gradient-to-br
-      from-orange-50 to-white
-      dark:from-slate-900 dark:to-slate-800
-    ">
+    <div className="min-h-screen flex justify-center items-center px-6">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="
-          w-full max-w-md
-          backdrop-blur-xl
-          bg-white/70 dark:bg-slate-800/70
-          border border-white/40 dark:border-slate-700
-          shadow-2xl
-          rounded-3xl
-          p-10
-          text-center
-        "
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="glass rounded-3xl p-10 shadow-xl w-full max-w-md text-center"
       >
-        {/* Avatar */}
         <div className="flex justify-center mb-6">
-          <div className="
-            p-5
-            rounded-full
-            bg-gradient-to-r from-orange-500 to-amber-500
-            shadow-lg
-          ">
-            <User size={42} className="text-white" />
+          <div className="bg-orange-500 p-4 rounded-full">
+            <User size={36} className="text-white" />
           </div>
         </div>
 
-        {/* Title */}
-        <h1 className="
-          text-2xl font-bold mb-2
-          bg-gradient-to-r from-orange-500 to-amber-500
-          bg-clip-text text-transparent
-        ">
+        <h2 className="text-2xl font-bold mb-3">
           User Profile
-        </h1>
+        </h2>
 
-        {/* Message */}
-        <p className="text-slate-600 dark:text-slate-300 mb-8">
-          {message || "Authenticated User"}
+        <p className="mb-8 text-slate-500 dark:text-slate-300">
+          {message}
         </p>
 
-        {/* Logout Button */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          whileHover={{ scale: 1.02 }}
-          onClick={handleLogout}
-          className="
-            w-full
-            flex items-center justify-center gap-2
-            bg-gradient-to-r from-orange-500 to-amber-500
-            hover:from-orange-600 hover:to-amber-600
-            text-white
-            py-3
-            rounded-xl
-            font-medium
-            shadow-lg
-            transition-all
-          "
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            navigate("/login");
+            window.location.reload();
+          }}
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl flex justify-center gap-2"
         >
           <LogOut size={18} />
           Logout
-        </motion.button>
+        </button>
       </motion.div>
     </div>
   );

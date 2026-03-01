@@ -1,63 +1,59 @@
 @import "tailwindcss";
 
 /* ===================================================== */
-/* GLOBAL THEME BASE */
+/* GLOBAL BASE */
 /* ===================================================== */
 
-/* Smooth transitions globally */
-* {
-  transition: background-color 0.3s ease,
-              color 0.3s ease,
-              border-color 0.3s ease;
+html, body, #root {
+  height: 100%;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+/* Smooth transitions globally (keep it light) */
+* {
+  transition: background-color 0.25s ease,
+              color 0.25s ease,
+              border-color 0.25s ease;
+}
+
+/* Tailwind v4 + @apply works here */
 body {
-  font-family: 'Inter', sans-serif;
-
-  /* 🔥 This is what makes dark mode visible */
-  @apply bg-slate-50 text-slate-900
-         dark:bg-slate-900 dark:text-white
-         min-h-screen;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  @apply bg-slate-50 text-slate-900 min-h-screen;
 }
 
-/* ===================================================== */
-/* HEADINGS */
-/* ===================================================== */
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
+.dark body {
+  @apply bg-slate-950 text-slate-100;
 }
 
-p {
-  color: inherit; /* Important */
-}
+/* Paragraph inherits theme */
+p { color: inherit; }
 
 /* ===================================================== */
-/* GLASS EFFECT */
+/* GLASS */
 /* ===================================================== */
 
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.70);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.30);
 }
 
 .dark .glass {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 /* ===================================================== */
-/* PREMIUM BUTTON */
+/* OPTIONAL: premium button */
 /* ===================================================== */
 
 .btn-premium {
   @apply bg-gradient-to-r from-indigo-500 to-purple-600
          text-white px-6 py-3 rounded-xl font-semibold
-         hover:scale-105 shadow-lg;
+         hover:scale-[1.02] shadow-lg;
 }

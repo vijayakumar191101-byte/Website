@@ -15,7 +15,6 @@ import Navbar from "./components/Navbar";
 import MobileNav from "./components/MobileNav";
 
 import { ThemeProvider } from "./context/ThemeContext";
-
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -28,72 +27,74 @@ function App() {
 
   return (
     <ThemeProvider>
-    <CartProvider>
-      <BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          {/* Navbar only when logged in */}
+          {isLoggedIn && <Navbar />}
 
-        {isLoggedIn && <Navbar />}
+          {/* ✅ Padding only for logged-in pages */}
+          <div className={isLoggedIn ? "pt-28 pb-24" : ""}>
+            <Routes>
+              {/* Onboarding */}
+              <Route path="/" element={<Onboarding />} />
 
-        {/* IMPORTANT: Add top padding because navbar is fixed */}
-        <div className="pt-28">
-          <Routes>
+              {/* Signup */}
+              <Route
+                path="/signup"
+                element={!isLoggedIn ? <Signup /> : <Navigate to="/home" />}
+              />
 
-            <Route path="/" element={<Onboarding />} />
+              {/* Login */}
+              <Route
+                path="/login"
+                element={
+                  !isLoggedIn ? (
+                    <Login setIsLoggedIn={setIsLoggedIn} />
+                  ) : (
+                    <Navigate to="/home" />
+                  )
+                }
+              />
 
-            <Route
-              path="/signup"
-              element={!isLoggedIn ? <Signup /> : <Navigate to="/home" />}
-            />
+              {/* Protected Routes */}
+              <Route
+                path="/home"
+                element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
+              />
 
-            <Route
-              path="/login"
-              element={
-                !isLoggedIn ? (
-                  <Login setIsLoggedIn={setIsLoggedIn} />
-                ) : (
-                  <Navigate to="/home" />
-                )
-              }
-            />
+              <Route
+                path="/category/:name"
+                element={isLoggedIn ? <CategoryPage /> : <Navigate to="/login" />}
+              />
 
-            <Route
-              path="/home"
-              element={isLoggedIn ? <Home /> : <Navigate to="/login" />}
-            />
+              <Route
+                path="/cart"
+                element={isLoggedIn ? <Cart /> : <Navigate to="/login" />}
+              />
 
-            <Route
-              path="/category/:name"
-              element={isLoggedIn ? <CategoryPage /> : <Navigate to="/login" />}
-            />
+              <Route
+                path="/checkout"
+                element={isLoggedIn ? <Checkout /> : <Navigate to="/login" />}
+              />
 
-            <Route
-              path="/cart"
-              element={isLoggedIn ? <Cart /> : <Navigate to="/login" />}
-            />
+              <Route
+                path="/success"
+                element={isLoggedIn ? <OrderSuccess /> : <Navigate to="/login" />}
+              />
 
-            <Route
-              path="/checkout"
-              element={isLoggedIn ? <Checkout /> : <Navigate to="/login" />}
-            />
+              <Route
+                path="/profile"
+                element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
+              />
 
-            <Route
-              path="/success"
-              element={isLoggedIn ? <OrderSuccess /> : <Navigate to="/login" />}
-            />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </div>
 
-            <Route
-              path="/profile"
-              element={isLoggedIn ? <Profile /> : <Navigate to="/login" />}
-            />
-
-            <Route path="*" element={<Navigate to="/" />} />
-
-          </Routes>
-        </div>
-
-        {isLoggedIn && <MobileNav />}
-
-      </BrowserRouter>
-    </CartProvider>
+          {/* MobileNav only when logged in */}
+          {isLoggedIn && <MobileNav />}
+        </BrowserRouter>
+      </CartProvider>
     </ThemeProvider>
   );
 }

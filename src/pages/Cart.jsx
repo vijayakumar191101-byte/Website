@@ -4,20 +4,17 @@ import { useCart } from "../context/CartContext";
 
 function Cart() {
   const navigate = useNavigate();
-  const { cart, increaseQty, decreaseQty, getTotal } = useCart();
-
-  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+  const { cart, increaseQty, decreaseQty, getTotal, totalItems } = useCart();
 
   if (cart.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[70vh]">
-        <h2 className="text-3xl font-semibold mb-6 text-slate-700 dark:text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6">
+        <h2 className="text-3xl font-bold mb-6">
           Your Cart is Empty 🛒
         </h2>
         <button
           onClick={() => navigate("/home")}
-          className="bg-orange-500 px-8 py-3 text-white rounded-xl 
-          hover:scale-105 transition shadow-lg"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl"
         >
           Continue Shopping
         </button>
@@ -26,8 +23,8 @@ function Cart() {
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-4xl font-bold mb-10 text-slate-800 dark:text-white">
+    <div className="min-h-screen px-6 md:px-12 pb-20">
+      <h1 className="text-4xl font-bold mb-10">
         Shopping Cart
       </h1>
 
@@ -35,72 +32,67 @@ function Cart() {
         {cart.map((item) => (
           <motion.div
             key={item.id}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-between items-center
-            backdrop-blur-xl bg-white/70 dark:bg-slate-800/50
-            border border-white/20
-            shadow-xl rounded-2xl p-6"
+            className="glass rounded-2xl p-6 shadow-xl flex justify-between items-center"
           >
             <div>
-              <h2 className="text-xl font-semibold dark:text-white">
+              <h3 className="text-lg font-semibold">
                 {item.name}
-              </h2>
-              <p className="text-slate-500">${item.price}</p>
+              </h3>
+              <p className="text-slate-500 dark:text-slate-300">
+                ${item.price}
+              </p>
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 onClick={() => decreaseQty(item.id)}
-                className="bg-slate-200 dark:bg-slate-700
-                w-8 h-8 rounded-full hover:bg-red-500
-                hover:text-white transition"
+                className="w-8 h-8 rounded-full bg-red-400 dark:bg-slate-700"
               >
                 -
               </button>
 
-              <span className="text-lg font-bold dark:text-white">
+              <span className="font-bold text-lg">
                 {item.qty}
               </span>
 
               <button
                 onClick={() => increaseQty(item.id)}
-                className="bg-slate-200 dark:bg-slate-700
-                w-8 h-8 rounded-full hover:bg-teal-500
-                hover:text-white transition"
+                className="w-8 h-8 rounded-full bg-green-400 dark:bg-slate-700"
               >
                 +
               </button>
             </div>
 
-            <div className="text-xl font-bold text-orange-500">
+            <div className="font-bold text-orange-500">
               ${item.price * item.qty}
             </div>
           </motion.div>
         ))}
       </div>
 
+      {/* Summary */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="mt-10 backdrop-blur-xl bg-white/70 dark:bg-slate-800/50
-        border border-white/20 shadow-2xl rounded-2xl p-8"
+        className="glass rounded-2xl p-8 mt-10 shadow-xl"
       >
-        <div className="flex justify-between text-xl mb-4 dark:text-white">
+        <div className="flex justify-between text-lg mb-4">
           <span>Total Items</span>
           <span>{totalItems}</span>
         </div>
 
-        <div className="flex justify-between text-3xl font-bold mb-6 dark:text-white">
+        <div className="flex justify-between text-3xl font-bold mb-6">
           <span>Total</span>
-          <span className="text-orange-500">${getTotal()}</span>
+          <span className="text-orange-500">
+            ${getTotal()}
+          </span>
         </div>
 
         <button
           onClick={() => navigate("/checkout")}
-          className="w-full bg-gradient-to-r from-teal-500 to-orange-500
-          text-white py-4 rounded-2xl text-lg
-          hover:scale-[1.02] transition shadow-lg"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg"
         >
           Proceed to Checkout
         </button>
